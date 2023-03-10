@@ -1,33 +1,157 @@
+// import React, { useState, useEffect } from "react";
+
+// const API_KEY = "494acf1adscsecscsece3bc46bd";
+// const GEOCODER_API_KEY = "78761dc8fe6a4d5f97429dcf3a1f0928";
+// // const GEOCODER_API_URL = `https://api.opencagedata.com/geocode/v1/json?key=78761dc8fe6a4d5f97429dcf3a1f0928&q=52.3877830%2C+9.7334394&pretty=1&no_annotations=1`;
+// // const GEOCODER_API_URL = `https://api.opencagedata.com/geocode/v1/json?key=${GEOCODER_API_KEY}&pretty=1&q=`;
+
+// function App() {
+//   const [longitude, setLongitude] = useState(null);
+//   const [latitude, setLatitude] = useState(null);
+//   const [weatherData, setWeatherData] = useState(null);
+//   const [city, setCity] = useState(null);
+//   const [country, setCountry] = useState(null);
+
+//   useEffect(() => {
+//     navigator.geolocation.getCurrentPosition(
+//       position => {
+//         setLongitude(position.coords.longitude);
+//         setLatitude(position.coords.latitude);
+//       },
+//       error => console.error(error)
+//     );
+//   }, []);
+
+//   useEffect(() => {
+//     if (longitude && latitude) {
+//       const GEOCODER_API_URL = `https://api.opencagedata.com/geocode/v1/json?key=${GEOCODER_API_KEY}&q=${latitude}+${longitude}&pretty=1&no_annotations=1`;
+
+//       // const GEOCODER_API_URL = `https://api.opencagedata.com/geocode/v1/json?key=78761dc8fe6a4d5f97429dcf3a1f0928&q=52.3877830%2C+9.7334394&pretty=1&no_annotations=1`;
+
+//       fetch(`${GEOCODER_API_URL}`)
+//         .then(response => response.json())
+//         .then(data => {
+//           setCity(data.results[0].components.city);
+//           setCountry(data.results[0].components.country);
+//         })
+//         .catch(error => console.error(error));
+
+//       fetch(
+//         `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+//       )
+//         .then(response => response.json())
+//         .then(data => setWeatherData(data))
+//         .catch(error => console.error(error));
+//     }
+//   }, [longitude, latitude]);
+//   console.log(weatherData)
+
+//   if (!weatherData || !city || !country) {
+//     return <div>Loading...</div>;
+//   }
+
+//   return (
+//     <div>
+//       <h1>Weather for {city}, {country}</h1>
+//       <p>Temperature: {Math.round(weatherData.main.temp - 273.15)}&deg;C</p>
+//       <p>Humidity: {weatherData.main.humidity}%</p>
+//       <p>Weather: {weatherData.weather[0].description}</p>
+//     </div>
+//   );
+// }
+
+// export default App;
+
+// LAST
 import React, { useState, useEffect } from "react";
 
 const API_KEY = "494acf1a670d397f44364e60c3bc46bd";
-const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=Casablanca,MA&appid=${API_KEY}`;
+const API_URL = `https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid=${API_KEY}`;
 
 function App() {
   const [weatherData, setWeatherData] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [country, setCountry] = useState(null)
+
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(response => response.json())
-      .then(data => setWeatherData(data))
-      .catch(error => console.error(error));
+    navigator.geolocation.getCurrentPosition(position => {
+      const { latitude, longitude } = position.coords;
+      const url = API_URL.replace("{latitude}", latitude).replace("{longitude}", longitude);
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => setWeatherData(data))
+        .catch(error => console.error(error)
+      );
+
+      fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=78761dc8fe6a4d5f97429dcf3a1f0928`)
+        .then(response => response.json())
+        .then(
+          data => {
+            setLocation(data.results[0].formatted)
+            setCountry(data.results[0].components.country)
+          }
+          )
+        .then(data => setCountry(data.results[0].components.country))
+        .catch(error => console.error(error)
+      );
+    });
+
+    
   }, []);
   console.log(weatherData)
+  console.log(location)
+  console.log('test')
   if (!weatherData) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <h1>Weather for Casablanca, Morocco</h1>
-      {/* <p>Temperature: {Math.round(weatherData.main.temp - 273.15)}&deg;C</p> */}
-      {/* <p>Humidity: {weatherData.main.humidity}%</p> */}
-      {/* <p>Weather: {weatherData.weather[0].description}</p> */}
+      <h1>Current Weather</h1>
+      <p>Your location: {location}</p>
+      <p>Your country: {country}</p>
+      <p>Temperature: {Math.round(weatherData.main.temp - 273.15)}&deg;C</p>
+      <p>Humidity: {weatherData.main.humidity}%</p>
+      <p>Weather: {weatherData.weather[0].description}</p>
     </div>
   );
 }
 
 export default App;
+
+// WORKING FOR SURE LAST 1
+// import React, { useState, useEffect } from "react";
+
+// const API_KEY = "494acf1a670d397f44364e60c3bc46bd";
+// const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=Khouribga,MA&appid=${API_KEY}`;
+
+// function App() {
+//   const [weatherData, setWeatherData] = useState(null);
+
+//   useEffect(() => {
+//     fetch(API_URL)
+//       .then(response => response.json())
+//       .then(data => setWeatherData(data))
+//       .catch(error => console.error(error));
+//   }, []);
+//   console.log(weatherData)
+//   if (!weatherData) {
+//     return <div>Loading...</div>;
+//   }
+
+//   return (
+//     <div>
+//       <h1>Weather for Khouribga, Morocco</h1>
+//       <p>Temperature: {Math.round(weatherData.main.temp - 273.15)}&deg;C</p>
+//       <p>Humidity: {weatherData.main.humidity}%</p>
+//       <p>Weather: {weatherData.weather[0].description}</p>
+//     </div>
+//   );
+// }
+
+// export default App;
 
 // ------ WORKING ----
 
